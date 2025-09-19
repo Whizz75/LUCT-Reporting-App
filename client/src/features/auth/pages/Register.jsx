@@ -8,11 +8,20 @@ export default function Register() {
 
   const handleRegister = async (formData) => {
     try {
-      const res = await api.post("/auth/register", formData)
+      // Map frontend fields → backend expectations
+      const payload = {
+        username: formData.email,   // backend expects "username", we send email
+        password: formData.password,
+        roleId: null,                  // 🔹 for now default to "student" role
+        studentId: null,            // 🔹 set later if needed
+        lecturerId: null            // 🔹 set later if needed
+      }
+
+      const res = await api.post("/auth/register", payload)
       const { token, user } = res.data
       setAuth(token, user)
 
-      // Redirect to dashboard based on role
+      // Redirect by role
       if (user.role === "student") {
         navigate("/student/monitoring")
       } else if (user.role === "lecturer") {

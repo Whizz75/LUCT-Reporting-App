@@ -1,7 +1,6 @@
-// src/lib/api.js
 import axios from "axios";
 import { API_BASE_URL } from "./constants";
-import { getToken } from "./auth";
+import { getToken, logout } from "./auth";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -10,6 +9,7 @@ const api = axios.create({
   },
 });
 
+// Attach JWT to requests
 api.interceptors.request.use(
   (config) => {
     const token = getToken();
@@ -21,12 +21,12 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Handle responses + auto-logout on 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("authToken");
-      window.location.href = "/login";
+      logout();
     }
     return Promise.reject(error);
   }
